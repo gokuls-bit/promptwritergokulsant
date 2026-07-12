@@ -12,72 +12,53 @@ export function normalizeGradeLevel(input) {
 
   const lower = input.toLowerCase().trim();
 
-  // Explicit canonical keys (pass-through)
+  // Exact canonical keys (pass-through)
   if (lower === 'elementary') return 'elementary';
   if (lower === 'middle') return 'middle';
   if (lower === 'high') return 'high';
   if (lower === 'adult') return 'adult';
 
-  // Elementary patterns
+  // College / advanced patterns (check BEFORE high school to avoid substring collisions)
   if (
-    lower.includes('elementary') ||
-    lower.includes('primary') ||
-    lower.includes('class 1') ||
-    lower.includes('class 2') ||
-    lower.includes('class 3') ||
-    lower.includes('class 4') ||
-    lower.includes('class 5') ||
-    lower.includes('grade 1') ||
-    lower.includes('grade 2') ||
-    lower.includes('grade 3') ||
-    lower.includes('grade 4') ||
-    lower.includes('grade 5') ||
-    lower === 'ages 8-10'
+    lower.includes('college') ||
+    lower.includes('university') ||
+    lower === 'advanced' ||
+    lower.includes('older student') ||
+    lower === 'ages 16+'
   ) {
-    return 'elementary';
+    return 'adult';
   }
 
-  // Middle school patterns
-  if (
-    lower.includes('middle school') ||
-    lower.includes('class 6') ||
-    lower.includes('class 7') ||
-    lower.includes('class 8') ||
-    lower.includes('grade 6') ||
-    lower.includes('grade 7') ||
-    lower.includes('grade 8') ||
-    lower === 'ages 11-13'
-  ) {
-    return 'middle';
-  }
-
-  // High school patterns
+  // High school / secondary (classes 9-12)  — use word-boundary-safe checks
   if (
     lower.includes('high school') ||
     lower.includes('secondary school') ||
-    lower.includes('class 9') ||
-    lower.includes('class 10') ||
-    lower.includes('class 11') ||
-    lower.includes('class 12') ||
-    lower.includes('grade 9') ||
-    lower.includes('grade 10') ||
-    lower.includes('grade 11') ||
-    lower.includes('grade 12') ||
+    /\bclass\s*(9|10|11|12)\b/.test(lower) ||
+    /\bgrade\s*(9|10|11|12)\b/.test(lower) ||
     lower === 'ages 14-15'
   ) {
     return 'high';
   }
 
-  // College / advanced patterns
+  // Middle school (classes 6-8)
   if (
-    lower.includes('college') ||
-    lower.includes('university') ||
-    lower.includes('advanced') ||
-    lower.includes('older student') ||
-    lower.includes('adult') ||
-    lower === 'ages 16+'
+    lower.includes('middle school') ||
+    /\bclass\s*[6-8]\b/.test(lower) ||
+    /\bgrade\s*[6-8]\b/.test(lower) ||
+    lower === 'ages 11-13'
   ) {
-    return 'adult';
+    return 'middle';
+  }
+
+  // Elementary (classes 1-5)
+  if (
+    lower.includes('elementary') ||
+    lower.includes('primary') ||
+    /\bclass\s*[1-5]\b/.test(lower) ||
+    /\bgrade\s*[1-5]\b/.test(lower) ||
+    lower === 'ages 8-10'
+  ) {
+    return 'elementary';
   }
 
   // Default fallback
