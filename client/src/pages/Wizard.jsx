@@ -194,9 +194,12 @@ export default function Wizard({ user, duplicatedPrompt, clearDuplicatedPrompt, 
       // If studentGradeLevel is in inputs, we use that for compilation
       const finalGrade = inputs.studentGradeLevel || inputs.gradeLevel || gradeLevel;
       const result = await promptAPI.compile(selectedTemplate.id, inputs, finalGrade);
-      setCompiledPrompt(result.compiledPrompt);
-      setQualityScore(result.qualityScore);
-      setScoreBreakdown(result.breakdown);
+      
+      // Parse Chapter 5 success data format
+      const responseData = result.data || {};
+      setCompiledPrompt(responseData.prompt || '');
+      setQualityScore(responseData.qualityScore || 0);
+      setScoreBreakdown(responseData.suggestions || []);
       setIsCompiled(true);
       
       // Auto-set a draft save title
@@ -526,7 +529,7 @@ export default function Wizard({ user, duplicatedPrompt, clearDuplicatedPrompt, 
                 }}></div>
               </div>
 
-              {/* Breakdown list */}
+              {/* Suggestions list */}
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -536,18 +539,13 @@ export default function Wizard({ user, duplicatedPrompt, clearDuplicatedPrompt, 
                 borderRadius: '12px',
                 border: '1px solid var(--border-subtle)'
               }}>
-                <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '4px' }}>Compile Quality Checklist:</div>
-                {scoreBreakdown.map((item, idx) => (
+                <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '4px' }}>
+                  Optimizer Suggestions & Checklist:
+                </div>
+                {scoreBreakdown.map((suggestion, idx) => (
                   <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px' }}>
-                    <span style={{
-                      color: item.status === 'Active' || item.status === 'Excellent' || item.status === 'Good' ? '#00f2fe' : '#ff4b4b',
-                      fontWeight: 'bold'
-                    }}>
-                      [✓]
-                    </span>
-                    <span style={{ color: 'var(--text-secondary)' }}>
-                      <strong>{item.criteria}:</strong> {item.description}
-                    </span>
+                    <span style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>[💡]</span>
+                    <span style={{ color: 'var(--text-secondary)' }}>{suggestion}</span>
                   </div>
                 ))}
               </div>

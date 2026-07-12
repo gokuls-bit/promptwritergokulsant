@@ -15,7 +15,7 @@ try {
 
   console.log('✓ Compilation Successful!');
   console.log(`Quality Score: ${result.qualityScore}`);
-  console.log('Breakdown:', JSON.stringify(result.breakdown, null, 2));
+  console.log('Suggestions:', JSON.stringify(result.suggestions, null, 2));
   console.log('\nFirst 200 characters of compiled prompt:');
   console.log(result.compiledPrompt.substring(0, 300) + '...\n');
 } catch (error) {
