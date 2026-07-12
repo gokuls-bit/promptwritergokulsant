@@ -1,6 +1,7 @@
 import { templates } from './templateRegistry.js';
 import { sanitizeInput } from '../sanitization/sanitizeInput.js';
 import { resolveVariables } from './variableResolver.js';
+import { normalizeGradeLevel } from './gradeNormalizer.js';
 import { getAgeRules } from '../rules/ageRules.js';
 import { getEducationRules } from '../rules/educationRules.js';
 import { getSubjectRules } from '../rules/subjectRules.js';
@@ -60,7 +61,9 @@ export function compilePrompt(categoryId, rawInputs = {}, studentGradeLevel = 'm
   coreBody = resolveVariables(coreBody, sanitizedInputs);
 
   // Step 7: Inject age/education rules
-  const finalGrade = sanitizedInputs.studentGradeLevel || sanitizedInputs.gradeLevel || studentGradeLevel;
+  // Normalize grade from any UI label (e.g. "Class 10", "Middle School") to compiler key
+  const rawGrade = sanitizedInputs.studentGradeLevel || sanitizedInputs.gradeLevel || studentGradeLevel;
+  const finalGrade = normalizeGradeLevel(rawGrade);
   const ageLayer = getAgeRules(finalGrade);
   const educationLayer = getEducationRules();
 
