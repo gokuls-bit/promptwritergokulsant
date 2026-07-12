@@ -1,50 +1,81 @@
 export default {
   id: 'cheat-sheet',
   title: 'Notes to Cheat Sheet',
-  description: 'Turn your messy classroom notes or text into a neat, organized, and bold cheat sheet.',
+  description: 'Convert a wall of notes into a compact, scannable reference card you can use to study before a test.',
   categoryType: 'text',
   requireCitations: false,
   fields: [
     {
-      name: 'topic',
-      label: 'Main Subject/Topic',
-      type: 'text',
-      placeholder: 'e.g., Chemistry Periodic Table / French Revolution',
-      required: true
-    },
-    {
-      name: 'rawNotes',
-      label: 'Paste Your Notes Here',
+      name: 'notesText',
+      label: 'Your Notes or Key Content',
       type: 'textarea',
-      placeholder: 'Paste your raw notes, definitions, or textbook pages...',
-      required: true
+      placeholder: 'Paste your class notes, textbook snippets, or a topic outline here...',
+      required: true,
+      minLength: 20,
+      maxLength: 3000,
+      helpText: 'Paste the raw content you want turned into a revision card.'
     },
     {
-      name: 'cheatSheetFormat',
-      label: 'Preferred Layout style',
+      name: 'subject',
+      label: 'Subject',
       type: 'select',
-      options: ['Formulas & Definitions', 'Chronological Timeline', 'Q&A Flashcard Style', 'Key Facts & Bullets'],
-      required: true
+      options: ['Mathematics', 'Science', 'History & Social Studies', 'English & Literature', 'Geography', 'Computer Science', 'General'],
+      required: true,
+      helpText: 'Helps apply the right formatting style for the subject.'
+    },
+    {
+      name: 'gradeLevel',
+      label: 'Your Grade Level',
+      type: 'select',
+      options: ['Elementary School', 'Middle School', 'High School', 'Older Student'],
+      required: true,
+      helpText: 'Adjusts vocabulary and depth.'
     }
   ],
+
   buildPrompt(inputs) {
     return `
-You are a study-skills coach. Convert the following messy notes into a highly structured study cheat sheet.
+You are an expert at distilling complex information into clear, exam-ready revision cards.
 
-TOPIC:
-${inputs.topic}
+SUBJECT: ${inputs.subject}
+STUDENT LEVEL: ${inputs.gradeLevel}
 
-RAW NOTES:
+SOURCE NOTES:
 """
-${inputs.rawNotes}
+${inputs.notesText}
 """
 
-INSTRUCTIONS:
-1. Organize the notes based on the style: ${inputs.cheatSheetFormat}.
-2. Use clear bold headings, tables, or lists to separate concepts.
-3. Highlight critical formulas, terms, or dates in **bold text**.
-4. Create at least one mnemonic device (e.g., acronyms) to help the student memorize key details.
-5. Keep explanations extremely short (1-2 sentences maximum per concept) for quick scanning.
+CREATE A CHEAT SHEET using this structure:
+
+# [Topic Name] — Quick Reference Card
+
+## ⚡ Key Definitions
+| Term | Plain-English Definition |
+|------|--------------------------|
+| ... | ... |
+
+## 📌 Core Concepts (3-7 bullet points, one idea per bullet)
+- ...
+
+## 🔢 Formulas / Dates / Key Facts (only if relevant to the subject)
+- ...
+
+## 🔗 How It Connects (optional — show how concepts link to each other)
+- ...
+
+## 🚨 Common Mistakes to Avoid
+- ...
+
+## 🎯 Three Things to Remember for the Exam
+1. ...
+2. ...
+3. ...
+
+RULES:
+- Only use facts from the provided source notes — do NOT add new invented information.
+- Keep every line short and scannable — this is a reference card, not an essay.
+- Use bold, tables, and bullet points for maximum visual clarity.
+- Simplify vocabulary for a ${inputs.gradeLevel} student.
 `;
   }
 };
