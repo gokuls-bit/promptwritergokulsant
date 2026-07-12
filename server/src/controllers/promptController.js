@@ -21,10 +21,11 @@ export function getTemplates(req, res) {
  */
 export function compile(req, res) {
   try {
-    const { categoryId, inputs, gradeLevel } = req.body;
+    const { category, categoryId, inputs, gradeLevel } = req.body;
+    const activeCategory = category || categoryId;
 
-    if (!categoryId || !inputs) {
-      return res.status(400).json({ error: 'Category ID and inputs are required.' });
+    if (!activeCategory || !inputs) {
+      return res.status(400).json({ error: 'Category and inputs are required.' });
     }
 
     // Determine the grade level (logged-in user preferences vs. guest input)
@@ -33,9 +34,16 @@ export function compile(req, res) {
       finalGradeLevel = req.user.gradeLevel;
     }
 
-    const compilation = compilePrompt(categoryId, inputs, finalGradeLevel);
+    const compilation = compilePrompt(activeCategory, inputs, finalGradeLevel);
 
-    res.status(200).json(compilation);
+    res.status(200).json({
+      success: true,
+      data: {
+        prompt: compilation.compiledPrompt,
+        qualityScore: compilation.qualityScore,
+        suggestions: compilation.suggestions
+      }
+    });
   } catch (error) {
     // If the error comes from our safety layer or validation, return 400
     res.status(400).json({ error: error.message });
