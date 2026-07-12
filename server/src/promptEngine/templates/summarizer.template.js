@@ -1,7 +1,7 @@
 export default {
   id: 'summarizer',
   title: 'Chapter Summarizer',
-  description: 'Summarize a book chapter, notes, or textbook section into key takeaways, characters, and themes.',
+  description: 'Turn a long chapter, article, or set of notes into clear structured summaries you can actually study from.',
   categoryType: 'text',
   requireCitations: true,
   fields: [
@@ -9,19 +9,11 @@ export default {
       name: 'sourceText',
       label: 'Text to Summarize',
       type: 'textarea',
-      placeholder: 'Paste the book chapter, article, or textbook section here...',
+      placeholder: 'Paste the chapter, article, or notes here...',
       required: true,
-      minLength: 20,
-      maxLength: 2000,
-      helpText: 'Paste the notes or article you want us to summarize.'
-    },
-    {
-      name: 'summaryLength',
-      label: 'Summary length',
-      type: 'chip',
-      options: ['Very Short (1 paragraph)', 'Standard (3 key sections)', 'Comprehensive (detailed notes)'],
-      required: true,
-      helpText: 'Select how long the final summary should be.'
+      minLength: 30,
+      maxLength: 3000,
+      helpText: 'Paste the exact source text — the summary will never add invented facts beyond what you paste.'
     },
     {
       name: 'gradeLevel',
@@ -29,34 +21,58 @@ export default {
       type: 'select',
       options: ['Elementary School', 'Middle School', 'High School', 'Older Student'],
       required: true,
-      helpText: 'Matches explanation depth to your school grade level.'
+      helpText: 'Matches explanation depth and vocabulary to your level.'
+    },
+    {
+      name: 'summaryLength',
+      label: 'Summary Length',
+      type: 'chip',
+      options: ['Very Short (1 paragraph)', 'Standard (3 key sections)', 'Comprehensive (detailed study notes)'],
+      required: true,
+      helpText: 'How detailed do you need the summary to be?'
     },
     {
       name: 'format',
       label: 'Summary Format',
       type: 'select',
-      options: ['Chronological Timeline', 'Bullet Points & Themes', 'Q&A Study Guide', 'Main Characters & Plot'],
+      options: ['Bullet Points & Key Themes', 'Chronological Timeline', 'Q&A Study Guide', 'Main Characters & Plot', 'Concept Map Outline'],
       required: true,
-      helpText: 'How should the summary notes be laid out?'
+      helpText: 'How should the summary notes be structured?'
     }
   ],
+
   buildPrompt(inputs) {
     return `
-You are an expert academic tutor. Summarize the following source text.
-GRADE LEVEL: ${inputs.gradeLevel}
-FORMAT: ${inputs.format}
-LENGTH DETAIL: ${inputs.summaryLength}
+You are an expert study skills coach who creates clear, reliable summaries for students.
 
-SOURCE TEXT:
+STUDENT LEVEL: ${inputs.gradeLevel}
+SUMMARY FORMAT: ${inputs.format}
+DETAIL LEVEL: ${inputs.summaryLength}
+
+SOURCE TEXT TO SUMMARIZE:
 """
 ${inputs.sourceText}
 """
 
-INSTRUCTIONS:
-1. Provide a clear summary of the source text using the structure: "${inputs.format}".
-2. Scale explanation and complexity to a ${inputs.gradeLevel} level.
-3. Keep the output aligned to the length constraint: "${inputs.summaryLength}".
-4. Highlight important terminology, formulas, or historical dates in **bold text**.
+CRITICAL RULE — ZERO FABRICATION:
+You must ONLY use information that appears in the source text above.
+Do NOT add extra facts, names, dates, quotes, or ideas that are not in the source material, even if you know them to be true.
+If information is missing from the source, write "[Not covered in source]" rather than inventing it.
+
+SUMMARY INSTRUCTIONS:
+1. Begin with a one-sentence "Main Idea" statement.
+2. Structure the rest of the response using the "${inputs.format}" format.
+3. Scale detail to "${inputs.summaryLength}":
+   - Very Short: main idea + 3-5 key bullet points only.
+   - Standard: main idea + 3 themed sections with sub-points.
+   - Comprehensive: full breakdown with all sections, key quotes, definitions, and a study Q&A at the end.
+4. Bold all key terms, names, or dates from the source.
+5. Use vocabulary accessible to a ${inputs.gradeLevel} student.
+6. End with 3 questions the student should be able to answer after reading this summary.
+
+OUTPUT LANGUAGE:
+- Precise, scannable, and study-ready.
+- Avoid re-stating the same point twice.
 `;
   }
 };
