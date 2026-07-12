@@ -1,7 +1,7 @@
 export default {
   id: 'presentation',
-  title: 'Presentation/PPT Builder',
-  description: 'Plan your slides, slide titles, speaking notes, and visual diagram ideas for presentations.',
+  title: 'Presentation / PPT Builder',
+  description: 'Plan your slides with titles, talking points, visual ideas, and speaker notes — ready to build in PowerPoint or Google Slides.',
   categoryType: 'text',
   requireCitations: true,
   fields: [
@@ -9,29 +9,38 @@ export default {
       name: 'projectTopic',
       label: 'Presentation Topic',
       type: 'text',
-      placeholder: 'e.g., Renewable Energy / Home Budgets / Space Exploration',
+      placeholder: 'e.g., Planning a Home Budget / Renewable Energy / The Solar System',
       required: true,
       minLength: 3,
-      maxLength: 100,
-      helpText: 'What is the subject of your slide deck?'
+      maxLength: 120,
+      helpText: 'What is the subject of your presentation?'
     },
     {
       name: 'slideCount',
       label: 'Number of Slides',
       type: 'number',
-      placeholder: 'e.g., 10',
+      placeholder: '10',
       required: true,
       min: 3,
       max: 20,
-      helpText: 'How many slides should the presentation contain? (Min: 3, Max: 20)'
+      helpText: 'How many slides should the presentation have? (Min: 3, Max: 20)'
     },
     {
       name: 'projectType',
-      label: 'Presentation Type',
+      label: 'Presentation Purpose',
       type: 'select',
-      options: ['Science Fair Report', 'History Biography', 'Book Review & Analysis', 'Business & Personal Finance', 'Creative Story Showcase'],
+      options: [
+        'Mathematics Holiday Homework',
+        'Science Report / Experiment',
+        'History Biography / Timeline',
+        'Geography & Environment',
+        'English Literature Analysis',
+        'General Class Assignment',
+        'School Science Fair',
+        'Personal Finance & Life Skills'
+      ],
       required: true,
-      helpText: 'What class or formatting style is this project for?'
+      helpText: 'What is the occasion or class this is for?'
     },
     {
       name: 'studentGradeLevel',
@@ -39,31 +48,49 @@ export default {
       type: 'select',
       options: ['Elementary School', 'Middle School', 'High School', 'Older Student'],
       required: true,
-      helpText: 'Select your school level for age-appropriate language matching.'
+      helpText: 'Adjusts complexity, vocabulary, and argument depth.'
     }
   ],
-  buildPrompt(inputs) {
-    return `
-You are a public speaking and presentation expert. Help the student plan a slide presentation.
-TOPIC: "${inputs.projectTopic}"
-SLIDES: ${inputs.slideCount}
-TYPE: ${inputs.projectType}
-GRADE LEVEL: ${inputs.studentGradeLevel}
 
-INSTRUCTIONS:
-1. Generate exactly ${inputs.slideCount} slides in sequence.
-2. For every slide, strictly output the following format:
-   ---
-   ## Slide [Number]: [Specific Slide Title]
-   - **Core Point:** [One main sentence]
-   - **Supporting Detail:** [Two bulleted details]
-   - **Interesting Takeaway:** [One fascinating fact or quote]
-   
-   **Visual Idea:** [Describe a picture, diagram, map, or chart that would look great on this slide]
-   **Speaking Notes:** [2 sentences of script for what the student should say out loud]
-   ---
-3. Use vocabulary suitable for a ${inputs.studentGradeLevel} student.
-4. Keep the slide layout clean and avoid visual clutter.
+  buildPrompt(inputs) {
+    const count = inputs.slideCount || 10;
+    return `
+You are an expert presentation coach and visual communication specialist.
+
+TOPIC: ${inputs.projectTopic}
+PURPOSE: ${inputs.projectType}
+TOTAL SLIDES: ${count}
+STUDENT LEVEL: ${inputs.studentGradeLevel}
+
+GENERATE EXACTLY ${count} SLIDES. Use this parseable Markdown format for EVERY slide:
+
+---
+## Slide [N]: [Specific, Descriptive Slide Title]
+
+- **Core Point:** [The single most important idea on this slide — 1 clear sentence]
+- **Supporting Detail 1:** [A fact, statistic, or explanation that backs up the core point]
+- **Supporting Detail 2:** [A second piece of supporting evidence or elaboration]
+- **Interesting Takeaway:** [A surprising fact, real-world connection, or thought-provoking note]
+
+**Visual Idea:** [Describe a specific chart, diagram, image, map, or graphic that would reinforce this slide's message. Be specific — e.g., "A pie chart showing percentage breakdown of household expenses"]
+
+**Speaker Notes:** [2-3 sentences the student should say out loud when presenting this slide. Written in first person, conversational tone.]
+---
+
+SLIDE STRUCTURE GUIDANCE:
+- Slide 1: Title slide — include topic, student name placeholder, and purpose/class.
+- Slide 2: Agenda / Overview — list what the presentation will cover.
+- Slides 3 to ${count - 2}: Core content slides covering different aspects of "${inputs.projectTopic}".
+- Slide ${count - 1}: Summary / Key Takeaways.
+- Slide ${count}: References / Bibliography placeholder.
+
+CONTENT RULES:
+- Each slide must cover a distinct sub-topic — do not repeat the same idea across slides.
+- Content must be accurate and appropriate for a ${inputs.studentGradeLevel} student.
+- For "${inputs.projectType}", include subject-relevant data, examples, and perspectives.
+- Vocabulary must be appropriate for ${inputs.studentGradeLevel} level.
+- Visual ideas must be specific and buildable with free tools (Google Slides, Canva, PowerPoint).
+- Speaker notes must be written in natural spoken language — not bullet points.
 `;
   }
 };
