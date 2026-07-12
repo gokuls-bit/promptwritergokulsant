@@ -6,47 +6,56 @@ export default {
   requireCitations: false,
   fields: [
     {
-      name: 'concept',
-      label: 'Concept to Explain',
+      name: 'topic',
+      label: 'Concept/Topic',
       type: 'text',
-      placeholder: 'e.g., Quantum physics, inflation, photosynthesis, binary code',
-      required: true
+      placeholder: 'e.g., Quantum physics, inflation, binary code',
+      required: true,
+      minLength: 3,
+      maxLength: 100,
+      helpText: 'What is the difficult idea you want explained?'
     },
     {
-      name: 'analogyTheme',
-      label: 'Choose an Analogy Theme',
+      name: 'gradeLevel',
+      label: 'Your Grade Level',
       type: 'select',
-      options: ['Video Games', 'Cooking/Food', 'Sports', 'Animals/Nature', 'Superheroes', 'Amusement Parks'],
-      required: true
+      options: ['Elementary School', 'Middle School', 'High School', 'Older Student'],
+      required: true,
+      helpText: 'We will tailor the vocabulary to this school level.'
     },
     {
-      name: 'additionalDetails',
-      label: 'Any specific questions or points? (Optional)',
-      type: 'text',
-      placeholder: 'e.g., Explain why it is important',
-      required: false
+      name: 'whatIsConfusing',
+      label: 'What is confusing about it?',
+      type: 'textarea',
+      placeholder: 'e.g., I do not understand how the parts connect / how it fits together...',
+      required: true,
+      minLength: 5,
+      maxLength: 500,
+      helpText: 'Tell us exactly what part is giving you trouble.'
+    },
+    {
+      name: 'preferredExampleType',
+      label: 'Choose an Analogy Style',
+      type: 'chip',
+      options: ['Video Games', 'Cooking & Food', 'Sports', 'Animals & Nature', 'Superheroes'],
+      required: true,
+      helpText: 'Pick a theme you understand well so we can compare the concept to it.'
     }
   ],
   buildPrompt(inputs) {
-    const concept = inputs.concept;
-    const theme = inputs.analogyTheme;
-    const details = inputs.additionalDetails ? `\nFocus specifically on: ${inputs.additionalDetails}` : '';
-
     return `
-You are a creative educator who specializes in explaining difficult things in the simplest way possible.
-
-CONCEPT:
-${concept}
-${details}
+You are a creative educator who specializes in explaining difficult things simply. Explain:
+TOPIC: "${inputs.topic}"
+GRADE LEVEL: ${inputs.gradeLevel}
+WHAT IS CONFUSING: "${inputs.whatIsConfusing}"
 
 INSTRUCTIONS:
-1. Explain this concept using a central, extended analogy based on the theme of "${theme}". For example, if the theme is "Video Games", explain the concept as if it were a leveling system, game mechanics, or a quest.
-2. Break the explanation into:
+1. Explain this concept using a central, extended analogy based on the theme of "${inputs.preferredExampleType}".
+2. Adapt vocabulary to suit a ${inputs.gradeLevel} student.
+3. Divide the response into:
    - "The Big Picture" (One sentence summary)
-   - "The Analogy" (Explain step-by-step using the chosen theme)
-   - "Why it Matters" (The practical real-world significance)
-3. Keep the language very engaging, simple, and clear.
-4. Bold key terms and provide definitions.
+   - "The Analogy Explained" (Step-by-step comparison to ${inputs.preferredExampleType})
+   - "Let's Check" (One easy check question)
 `;
   }
 };
