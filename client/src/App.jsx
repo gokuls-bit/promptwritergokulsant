@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
+import Home from './pages/Home';
 import Wizard from './pages/Wizard';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -9,6 +10,7 @@ import History from './pages/History';
 export default function App() {
   const [user, setUser] = useState(null);
   const [duplicatedPrompt, setDuplicatedPrompt] = useState(null);
+  const [activeCategory, setActiveCategory] = useState(null);
 
   // Load user from localStorage on mount
   useEffect(() => {
@@ -40,6 +42,14 @@ export default function App() {
     setDuplicatedPrompt(null);
   };
 
+  const handleSelectCategory = (categoryId) => {
+    setActiveCategory(categoryId);
+  };
+
+  const clearActiveCategory = () => {
+    setActiveCategory(null);
+  };
+
   return (
     <Router>
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -50,10 +60,18 @@ export default function App() {
             <Route 
               path="/" 
               element={
+                <Home onSelectCategory={handleSelectCategory} />
+              } 
+            />
+            <Route 
+              path="/create" 
+              element={
                 <Wizard 
                   user={user} 
                   duplicatedPrompt={duplicatedPrompt} 
-                  clearDuplicatedPrompt={clearDuplicatedPrompt} 
+                  clearDuplicatedPrompt={clearDuplicatedPrompt}
+                  activeCategory={activeCategory}
+                  clearActiveCategory={clearActiveCategory}
                 />
               } 
             />
