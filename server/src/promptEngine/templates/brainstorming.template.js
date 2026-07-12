@@ -1,52 +1,75 @@
 export default {
   id: 'brainstorming',
-  title: 'Brainstorming Assistant',
-  description: 'Generate fresh, creative ideas, names, or suggestions for any project or activity.',
+  title: 'Brainstorming Partner',
+  description: 'Generate a rich variety of ideas, angles, and starting points for any project, topic, or creative goal.',
   categoryType: 'text',
   requireCitations: false,
   fields: [
     {
       name: 'brainstormGoal',
-      label: 'What are you trying to brainstorm?',
+      label: 'What do you need ideas for?',
       type: 'text',
-      placeholder: 'e.g., Names for a school robotics club / Story ideas about a time traveler',
-      required: true
+      placeholder: 'e.g., Science fair project ideas / Topics for an English essay / Business ideas for school fair',
+      required: true,
+      minLength: 5,
+      maxLength: 150,
+      helpText: 'Describe the problem or project you need creative ideas for.'
     },
     {
-      name: 'creativityStyle',
-      label: 'Idea Style',
+      name: 'studentGradeLevel',
+      label: 'Your Grade Level',
       type: 'select',
-      options: ['Realistic & Practical', 'Wild & Highly Creative', 'Funny & Silly'],
-      required: true
+      options: ['Elementary School', 'Middle School', 'High School', 'Older Student'],
+      required: true,
+      helpText: 'Controls complexity and depth of ideas.'
     },
     {
       name: 'ideaCount',
       label: 'How many ideas?',
-      type: 'select',
-      options: ['5 Ideas', '10 Ideas', '15 Ideas'],
-      required: true
+      type: 'number',
+      placeholder: '10',
+      required: true,
+      min: 5,
+      max: 20,
+      helpText: 'Number of ideas to generate. (Min: 5, Max: 20)'
+    },
+    {
+      name: 'constraints',
+      label: 'Any constraints or requirements? (optional)',
+      type: 'textarea',
+      placeholder: 'e.g., Must be doable at home with cheap materials / Must relate to environmental science...',
+      required: false,
+      maxLength: 400,
+      helpText: 'Optional — add any rules, themes, or limitations the ideas must follow.'
     }
   ],
+
   buildPrompt(inputs) {
+    const constraintNote = inputs.constraints
+      ? `\nCONSTRAINTS TO RESPECT: "${inputs.constraints}"\nEvery idea must fit within these constraints.`
+      : '';
+
     return `
-You are a creative brainstorming facilitator. Help the student brainstorm ideas.
+You are a creative thinking partner helping a ${inputs.studentGradeLevel} student generate great ideas.
 
-GOAL:
-${inputs.brainstormGoal}
+BRAINSTORMING GOAL: ${inputs.brainstormGoal}
+${constraintNote}
 
-STYLE:
-${inputs.creativityStyle}
+GENERATE ${inputs.ideaCount} IDEAS using this format for each:
 
-QUANTITY:
-${inputs.ideaCount}
+**Idea [N]: [Catchy, memorable title]**
+- What it is: (1-2 sentences describing the core idea clearly)
+- Why it is interesting: (1 sentence — what makes this idea stand out)
+- How to start: (1-2 concrete first steps to begin this idea)
 
-INSTRUCTIONS:
-1. Provide a numbered list of ideas that fit the goal and style.
-2. For each idea:
-   - Provide a catchy name or title.
-   - Explain the concept in 2 sentences.
-   - List one "Next Step" or element to make it stand out.
-3. Keep the tone inspiring and open-minded.
+IDEA GENERATION RULES:
+1. Make ideas genuinely diverse — different angles, approaches, and styles.
+2. Ideas should range from straightforward/safe to creative/surprising.
+3. Include at least 2 ideas that are unusual or unexpected.
+4. All ideas must be age-appropriate and achievable for a ${inputs.studentGradeLevel} student.
+5. Do NOT suggest anything requiring dangerous materials, illegal activities, or adult supervision of a risky nature.
+6. Write with enthusiasm — good brainstorming is energising.
+7. After all ideas, add a "🎯 My Pick Helper" section with 3 questions the student can ask themselves to choose their favourite idea.
 `;
   }
 };
