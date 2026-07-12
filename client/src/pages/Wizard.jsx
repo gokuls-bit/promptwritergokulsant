@@ -37,7 +37,7 @@ const getIcon = (id) => {
   }
 };
 
-export default function Wizard({ user, duplicatedPrompt, clearDuplicatedPrompt }) {
+export default function Wizard({ user, duplicatedPrompt, clearDuplicatedPrompt, activeCategory, clearActiveCategory }) {
   const [templates, setTemplates] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [inputs, setInputs] = useState({});
@@ -90,6 +90,28 @@ export default function Wizard({ user, duplicatedPrompt, clearDuplicatedPrompt }
       }
     }
   }, [duplicatedPrompt, templates]);
+
+  // Handle preloading of an active category from Homepage
+  useEffect(() => {
+    if (activeCategory && templates.length > 0) {
+      const template = templates.find(t => t.id === activeCategory);
+      if (template) {
+        // We set selectedTemplate and initialize fields manually to match handleSelectTemplate
+        setSelectedTemplate(template);
+        const initialInputs = {};
+        template.fields.forEach(field => {
+          initialInputs[field.name] = field.type === 'select' ? field.options[0] : '';
+        });
+        setInputs(initialInputs);
+        setIsCompiled(false);
+        setCompiledPrompt('');
+        setSaveTitle('');
+        setSaveSuccess(false);
+        setError('');
+        clearActiveCategory();
+      }
+    }
+  }, [activeCategory, templates]);
 
   // Clean inputs when switching templates
   const handleSelectTemplate = (template) => {
