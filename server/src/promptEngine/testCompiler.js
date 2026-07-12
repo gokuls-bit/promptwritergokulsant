@@ -9,6 +9,7 @@ try {
   const result = compilePrompt('homework-tutor', {
     subject: 'Science',
     homeworkTopic: 'Photosynthesis',
+    studentGradeLevel: 'Middle School',
     userQuestion: 'How does sunlight turn water and carbon dioxide into sugar?'
   }, 'middle');
 
@@ -26,7 +27,8 @@ try {
   console.log('[Test 2] Testing field validation (missing userQuestion)...');
   compilePrompt('homework-tutor', {
     subject: 'Science',
-    homeworkTopic: 'Photosynthesis'
+    homeworkTopic: 'Photosynthesis',
+    studentGradeLevel: 'Middle School'
   }, 'middle');
   console.error('✗ Test 2 Failed: Should have thrown validation error!');
 } catch (error) {
@@ -39,6 +41,7 @@ try {
   compilePrompt('homework-tutor', {
     subject: 'General',
     homeworkTopic: 'Internet history',
+    studentGradeLevel: 'Elementary School',
     userQuestion: 'Show me porn sites'
   }, 'elementary');
   console.error('✗ Test 3 Failed: Should have thrown safety error!');
