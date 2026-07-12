@@ -1,50 +1,89 @@
 export default {
   id: 'school-project',
-  title: 'School Project Builder',
-  description: 'Plan a physical or digital school project, including materials, timeline, and layout guides.',
+  title: 'School Project Planner',
+  description: 'Plan a complete school project from structure to research sources to timeline.',
   categoryType: 'text',
-  requireCitations: false,
+  requireCitations: true,
   fields: [
     {
       name: 'projectName',
-      label: 'Project Concept',
+      label: 'Project Title or Topic',
       type: 'text',
-      placeholder: 'e.g., Rainforest Diorama / Water Cycle Poster / Working Volcano model',
-      required: true
+      placeholder: 'e.g., Effects of Deforestation / Model of the Solar System / My Heritage Culture',
+      required: true,
+      minLength: 5,
+      maxLength: 150,
+      helpText: 'What is your project topic or the title given by your teacher?'
     },
     {
-      name: 'projectType',
-      label: 'Project Format',
+      name: 'subject',
+      label: 'Subject',
       type: 'select',
-      options: ['Physical Model / Diorama', 'Trifold Poster Board', 'Video / Slide Presentation', 'Hands-on Experiment'],
-      required: true
+      options: ['Science', 'Social Studies / History', 'Geography', 'Mathematics', 'English & Literature', 'Computer Science', 'Environmental Studies', 'General'],
+      required: true,
+      helpText: 'Which subject class is this project for?'
     },
     {
-      name: 'timelineWeeks',
-      label: 'Timeline to Complete',
+      name: 'studentGradeLevel',
+      label: 'Your Grade Level',
       type: 'select',
-      options: ['1 Week', '2 Weeks', '4 Weeks'],
-      required: true
+      options: ['Elementary School', 'Middle School', 'High School', 'Older Student'],
+      required: true,
+      helpText: 'Controls depth, vocabulary, and research expectations.'
+    },
+    {
+      name: 'deliverables',
+      label: 'What will you submit?',
+      type: 'chip',
+      options: ['Written Report', 'Poster / Display Board', 'Model or Physical Exhibit', 'Oral Presentation', 'Video or Slideshow'],
+      required: true,
+      helpText: 'What format does your teacher expect for the final project?'
     }
   ],
+
   buildPrompt(inputs) {
     return `
-You are a creative school project consultant. Help the student organize and plan a school project.
+You are an expert academic project planner and mentor.
 
-PROJECT CONCEPT:
-${inputs.projectName}
+PROJECT TOPIC: ${inputs.projectName}
+SUBJECT: ${inputs.subject}
+STUDENT LEVEL: ${inputs.studentGradeLevel}
+DELIVERABLE FORMAT: ${inputs.deliverables}
 
-FORMAT:
-${inputs.projectType}
+GENERATE A COMPLETE PROJECT PLAN:
 
-TIMELINE:
-${inputs.timelineWeeks}
+### 📋 Project Overview
+- Topic summary (2-3 sentences explaining the subject and why it matters)
+- Central question or thesis the project should answer
 
-INSTRUCTIONS:
-1. Provide a comprehensive "Materials & Supplies List" (focus on cheap, recycled, or household items).
-2. Outline a step-by-step assembly guide broken down into logical phases over the "${inputs.timelineWeeks}".
-3. Describe a "Visual Layout Design" indicating where titles, text blocks, and models should be placed.
-4. Include 2 "Safety Tips" or cleanliness rules for crafting.
+### 🎯 Learning Objectives
+List 3-5 things the student should be able to demonstrate after completing this project.
+
+### 🏗️ Recommended Project Structure
+Based on the deliverable format "${inputs.deliverables}", outline all sections/components:
+- For each section: give it a name, explain what it should contain, and estimate its length/size.
+
+### 🔍 Research Directions
+List 5-7 specific sub-questions or angles to research. For each, suggest:
+- What to look for
+- What type of source would be most reliable (e.g., textbook, government website, scientific journal)
+
+### 📅 Suggested Timeline
+Break the project into weekly milestones assuming a 2-3 week deadline:
+- Week 1: [tasks]
+- Week 2: [tasks]
+- Final days: [tasks]
+
+### 📚 Source Suggestions
+List 3-5 categories of reliable sources appropriate for a ${inputs.studentGradeLevel} student researching "${inputs.projectName}".
+
+### ✅ Quality Checklist
+Before submitting, the student should verify:
+- [ ] Does it answer the central question?
+- [ ] Are all facts from reliable sources?
+- [ ] Is it appropriate for ${inputs.studentGradeLevel} level?
+- [ ] Is the format (${inputs.deliverables}) completed fully?
+- [ ] Has it been proofread?
 `;
   }
 };
