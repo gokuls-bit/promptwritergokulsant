@@ -431,48 +431,9 @@ export default function Wizard({ user, duplicatedPrompt, clearDuplicatedPrompt, 
               </div>
             </div>
 
-            <form onSubmit={handleCompile}>
-              {/* Dynamic form inputs */}
-              {selectedTemplate.fields.map((field) => (
-                <div className="form-group" key={field.name}>
-                  <label className="form-label">
-                    {field.label}
-                    {field.required && <span style={{ color: 'var(--accent-cyan)' }}>*</span>}
-                  </label>
-                  
-                  {field.type === 'select' ? (
-                    <select
-                      className="form-select"
-                      value={inputs[field.name] || ''}
-                      onChange={(e) => handleInputChange(field.name, e.target.value)}
-                    >
-                      {field.options.map(opt => (
-                        <option key={opt} value={opt}>{opt}</option>
-                      ))}
-                    </select>
-                  ) : field.type === 'textarea' ? (
-                    <textarea
-                      className="form-textarea"
-                      placeholder={field.placeholder}
-                      value={inputs[field.name] || ''}
-                      onChange={(e) => handleInputChange(field.name, e.target.value)}
-                      required={field.required}
-                    />
-                  ) : (
-                    <input
-                      type="text"
-                      className="form-input"
-                      placeholder={field.placeholder}
-                      value={inputs[field.name] || ''}
-                      onChange={(e) => handleInputChange(field.name, e.target.value)}
-                      required={field.required}
-                    />
-                  )}
-                </div>
-              ))}
-
-              {/* Adjust grade level (shown if user not logged in, otherwise reads user profile) */}
-              <div className="form-group" style={{ marginBottom: '28px' }}>
+            {/* Render fallback gradeLevel selector if not explicitly inside template schema */}
+            {!selectedTemplate.fields.some(f => f.name === 'studentGradeLevel' || f.name === 'gradeLevel') && (
+              <div className="form-group" style={{ marginBottom: '20px' }}>
                 <label className="form-label">Target School Grade Level</label>
                 {user ? (
                   <div style={{
@@ -498,17 +459,17 @@ export default function Wizard({ user, duplicatedPrompt, clearDuplicatedPrompt, 
                   </select>
                 )}
               </div>
+            )}
 
-              <button 
-                type="submit" 
-                className="btn btn-primary"
-                disabled={compiling}
-                style={{ width: '100%', padding: '14px', fontSize: '16px' }}
-              >
-                <Play size={18} />
-                {compiling ? 'Compiling rules...' : 'Compile Prompt'}
-              </button>
-            </form>
+            <DynamicForm
+              schema={selectedTemplate.fields}
+              values={inputs}
+              onChange={handleInputChange}
+              errors={validationErrors}
+              onSubmit={handleCompile}
+              submitLabel={compiling ? 'Compiling rules...' : 'Compile Prompt'}
+              submitting={compiling}
+            />
           </div>
 
           {/* STEP 3: RESULT DISPLAY */}
