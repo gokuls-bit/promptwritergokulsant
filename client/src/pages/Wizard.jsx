@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { promptAPI } from '../services/api';
+import DynamicForm from '../components/form/DynamicForm';
 import { 
   BookOpen, Lightbulb, Compass, FileText, FileCode, HelpCircle, 
   CreditCard, Zap, Layers, Presentation, Briefcase, Globe, 
@@ -45,6 +46,7 @@ export default function Wizard({ user, duplicatedPrompt, clearDuplicatedPrompt, 
   const [loading, setLoading] = useState(true);
   const [compiling, setCompiling] = useState(false);
   const [error, setError] = useState('');
+  const [validationErrors, setValidationErrors] = useState({});
   
   // Compiled output states
   const [compiledPrompt, setCompiledPrompt] = useState('');
@@ -86,10 +88,15 @@ export default function Wizard({ user, duplicatedPrompt, clearDuplicatedPrompt, 
         setSaveTitle('');
         setSaveSuccess(false);
         setError('');
-        clearDuplicatedPrompt();
+        setValidationErrors({});
+        clearDuplicatePrompt();
       }
     }
   }, [duplicatedPrompt, templates]);
+
+  const clearDuplicatePrompt = () => {
+    if (clearDuplicatedPrompt) clearDuplicatedPrompt();
+  };
 
   // Handle preloading of an active category from Homepage
   useEffect(() => {
@@ -100,7 +107,7 @@ export default function Wizard({ user, duplicatedPrompt, clearDuplicatedPrompt, 
         setSelectedTemplate(template);
         const initialInputs = {};
         template.fields.forEach(field => {
-          initialInputs[field.name] = field.type === 'select' ? field.options[0] : '';
+          initialInputs[field.name] = field.type === 'select' ? field.options[0] : field.type === 'chip' ? field.options[0] : '';
         });
         setInputs(initialInputs);
         setIsCompiled(false);
@@ -108,6 +115,7 @@ export default function Wizard({ user, duplicatedPrompt, clearDuplicatedPrompt, 
         setSaveTitle('');
         setSaveSuccess(false);
         setError('');
+        setValidationErrors({});
         clearActiveCategory();
       }
     }
@@ -118,7 +126,7 @@ export default function Wizard({ user, duplicatedPrompt, clearDuplicatedPrompt, 
     setSelectedTemplate(template);
     const initialInputs = {};
     template.fields.forEach(field => {
-      initialInputs[field.name] = field.type === 'select' ? field.options[0] : '';
+      initialInputs[field.name] = field.type === 'select' ? field.options[0] : field.type === 'chip' ? field.options[0] : '';
     });
     setInputs(initialInputs);
     setIsCompiled(false);
@@ -126,26 +134,74 @@ export default function Wizard({ user, duplicatedPrompt, clearDuplicatedPrompt, 
     setSaveTitle('');
     setSaveSuccess(false);
     setError('');
+    setValidationErrors({});
   };
 
   const handleInputChange = (name, value) => {
-    setInputs({ ...inputs, [name]: value });
+    setInputs(prev => ({ ...prev, [name]: value }));
+    if (validationErrors[name]) {
+      setValidationErrors(prev => ({ ...prev, [name]: undefined }));
+    }
   };
 
   const handleCompile = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     setError('');
+    
+    // Perform client-side schema-based validation
+    const errors = {};
+    selectedTemplate.fields.forEach(field => {
+      const val = inputs[field.name];
+      
+      // Required check
+      if (field.required && (val === undefined || val === null || val === '')) {
+        errors[field.name] = `${field.label} is required.`;
+        return;
+      }
+      
+      if (val === undefined || val === null || val === '') return;
+      
+      // Min length check
+      if (field.minLength !== undefined && String(val).length < field.minLength) {
+        errors[field.name] = `${field.label} must be at least ${field.minLength} characters.`;
+      }
+      
+      // Max length check
+      if (field.maxLength !== undefined && String(val).length > field.maxLength) {
+        errors[field.name] = `${field.label} cannot exceed ${field.maxLength} characters.`;
+      }
+
+      // Min value check (for numeric inputs)
+      if (field.min !== undefined && Number(val) < field.min) {
+        errors[field.name] = `${field.label} must be at least ${field.min}.`;
+      }
+
+      // Max value check (for numeric inputs)
+      if (field.max !== undefined && Number(val) > field.max) {
+        errors[field.name] = `${field.label} cannot exceed ${field.max}.`;
+      }
+    });
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      setError('Please fix the highlighted errors before compiling.');
+      return;
+    }
+
     setCompiling(true);
 
     try {
-      const result = await promptAPI.compile(selectedTemplate.id, inputs, gradeLevel);
+      // If studentGradeLevel is in inputs, we use that for compilation
+      const finalGrade = inputs.studentGradeLevel || inputs.gradeLevel || gradeLevel;
+      const result = await promptAPI.compile(selectedTemplate.id, inputs, finalGrade);
       setCompiledPrompt(result.compiledPrompt);
       setQualityScore(result.qualityScore);
       setScoreBreakdown(result.breakdown);
       setIsCompiled(true);
+      
       // Auto-set a draft save title
-      const topicValue = inputs.homeworkTopic || inputs.concept || inputs.skill || inputs.bookTitle || inputs.topic || inputs.quizTopic || inputs.brainstormGoal || inputs.essayTopic || inputs.projectTopic || inputs.projectName || inputs.researchTopic || inputs.interestArea || inputs.storyIdea || inputs.characterDescription || inputs.subjectDescription || inputs.memeTopic || inputs.cardName || inputs.posterTopic || inputs.speechTopic || inputs.customGoal || 'My Project';
-      setSaveTitle(`${selectedTemplate.title} - ${topicValue.substring(0, 30)}`);
+      const topicValue = inputs.homeworkTopic || inputs.topic || inputs.projectTopic || inputs.sourceText || inputs.characterDescription || inputs.cardName || 'My Project';
+      setSaveTitle(`${selectedTemplate.title} - ${String(topicValue).substring(0, 30)}`);
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.error || 'Failed to compile prompt. Check safety rules.');
